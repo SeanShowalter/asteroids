@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Inheritance</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="drawing.js"></script>
+    <script src="objects.js"></script>
+  </head>
+  <body>
+    <h1>Inheritance</h1>
+    <canvas id="asteroids" width="600" height="600" tabindex="1"></canvas>
+    <script>
+      "use strict";
+      // Create canvas and context
+      const ctx = document.getElementById("asteroids").getContext("2d");
+
+      draw_projectile(ctx, 200, 200, 1, 1);
+
+      const asteroids = new Array(5); // sets number of asteroids
+      for (let i = 0; i < asteroids.length; i++) {
+        let asteroid = new Asteroid(
+          Math.random() * ctx.canvas.width, // x
+          Math.random() * ctx.canvas.height, // y
+          2000 + Math.random() * 8000 // mass
+        );
+        asteroid.push(Math.random() * 2 * Math.PI, 2000, 60); // initiate motion
+        asteroid.twist((Math.random() - 0.5) * 500, 60); // initiate rotation
+        asteroids[i] = asteroid;
+      }
+
+      const shipAttribues = {
+        x: ctx.canvas.width / 2,
+        y: ctx.canvas.height / 2,
+        power: 1000,
+        guide: false,
+      };
+      const ship = new Ship(
+        shipAttribues.x,
+        shipAttribues.y,
+        shipAttribues.power,
+        shipAttribues.guide
+      );
+      const projectiles = new Array();
+
+      function draw(ctx) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        draw_grid(ctx);
+        asteroids.forEach((asteroid) => asteroid.draw(ctx));
+
+        ship.draw(ctx, true);
+        projectiles.forEach(function (p) {
+          p.draw(ctx);
+        });
+      }
+
+      function update(elapsed) {
+        asteroids.forEach((asteroid) => asteroid.update(elapsed, ctx));
+        // push in the direction its pointing
+        // ship.push(ship.angle, 1000, elapsed);
+        // if ship is nearly stopped, turn
+        if (Math.abs(ship.speed() > 100)) {
+          if (Math.abs(ship.speed() < 15)) {
+            ship.angle += Math.PI * 2 * 0.1;
+          }
+
+          // If the ship is going fast, turn it around and slow down
+          if (Math.abs(ship.speed()) > 1000) {
+            ship.angle = ship.movementAngle() + Math.PI;
+          }
+        }
+        ship.update(elapsed, ctx);
+
+        // removed projectiles after 1 second
+        projectiles.forEach(function (projectile, i, projectiles) {
+          projectile.update(elapsed, ctx);
+          if (projectile.life <= 0) {
+            projectiles.splice(i, 1);
+          }
+        });
+
+        // adds projectiles
+        if (ship.trigger && ship.loaded) {
+          // adds projectile to projectiles array
+          projectiles.push(ship.projectile(elapsed));
+        }
+      }
+
+      function key_handler(event, value) {
+        var nothing_handled = false;
+        switch (event.key || event.keyCode) {
+          case "ArrowUp":
+          case 38: // up arrow
+            ship.thrusterOn = value;
+            break;
+          case "ArrowLeft":
+          case 37: // left arrow keyCode
+            ship.leftThruster = value;
+            break;
+          case "ArrowRight":
+          case 39: // right arrow keyCode
+            ship.rightThruster = value;
+            break;
+          // case "g":
+          // case 71: // g
+          //   if (value) guide = !guide;
+          case " ":
+          case 32: // spacebar
+            ship.trigger = value;
+            // console.log("pressed spacebar");
+            break;
+          default:
+            nothing_handled = true;
+          // console.log("keyup");
+        }
+        if (!nothing_handled) event.preventDefault();
+      }
+
+      let previous, elapsed;
+      function frame(timestamp) {
+        if (!previous) previous = timestamp;
+        elapsed = timestamp - previous;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        update(elapsed / 1000);
+        draw(ctx);
+        previous = timestamp;
+        window.requestAnimationFrame(frame);
+      }
+      window.requestAnimationFrame(frame);
+      ctx.canvas.addEventListener(
+        "keydown",
+        function (event) {
+          key_handler(event, true);
+        },
+        true
+      );
+
+      ctx.canvas.addEventListener(
+        "keyup",
+        function (event) {
+          key_handler(event, false);
+        },
+        true
+      );
+      ctx.canvas.focus();
+    </script>
+  </body>
+</html>

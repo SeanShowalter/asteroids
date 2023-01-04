@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pac Man</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="drawing.js"></script>
+    <script src="objects.js"></script>
+  </head>
+  <body>
+    <h1>Pac Man</h1>
+    <canvas id="pacman" width="800" height="800" tabindex="1"></canvas>
+    <script>
+      // Create canvas and context
+      const ctx = document.getElementById("pacman").getContext("2d");
+      const x = ctx.canvas.width / 4;
+      const y = ctx.canvas.height / 4;
+      const radius = 20;
+      const speed = 10;
+      let pacman = new PacMan(x, y, radius, speed);
+      // let ghosts = [
+      //   new Ghost(Math.random() * 300, Math.random() * 300, 20, 70, "red"),
+      //   new Ghost(Math.random() * 300, Math.random() * 300, 20, 70, "pink"),
+      //   new Ghost(Math.random() * 300, Math.random() * 300, 20, 70, "cyan"),
+      //   new Ghost(Math.random() * 300, Math.random() * 300, 20, 70, "orange"),
+      // ];
+
+      function draw(ctx, guide) {
+        if (guide) {
+          draw_grid(ctx);
+        }
+        pacman.draw(ctx);
+        // ghosts.forEach(function (ghost) {
+        //   ghost.draw(ctx, guide);
+        // });
+      }
+
+      function update(elapsed) {
+        pacman.update(elapsed, ctx.canvas.width, ctx.canvas.height);
+        // ghosts.forEach(function(ghost) {
+        //     ghost.update(pacman, elapsed);
+        // })
+      }
+
+      let start, previousTimestamp;
+      let done = false;
+
+      function step(timestamp) {
+        if (start === undefined) start = timestamp;
+        const elapsed = timestamp - start;
+
+        if (previousTimestamp !== timestamp) {
+          // const count = Math.min(0.1 * elapsed, 2000);
+          // if (count === 2000) done = true;
+        }
+
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        update(elapsed / 1000);
+        draw(ctx, true);
+
+        previousTimestamp = timestamp;
+
+        if (!done) {
+          window.requestAnimationFrame(step);
+        } else {
+          console.log("finished");
+        }
+      }
+      window.requestAnimationFrame(step);
+
+      function keydown_handler(e) {
+        let key = e.key || e.keyCode;
+        let nothing_handled = false;
+        switch (key) {
+          case "ArrowLeft":
+          case 37: // left arrow keyCode
+            pacman.move_left();
+            break;
+          case "ArrowUp":
+          case 38: // up arrow keyCode
+            pacman.move_up();
+            break;
+          case "ArrowRight":
+          case 39: // right arrow keyCode
+            pacman.move_right();
+            break;
+          case "ArrowDown":
+          case 40: // down arrow keyCode
+            pacman.move_down();
+            break;
+          default:
+            nothing_handled = true;
+        }
+        if(!nothing_handled) e.preventDefault();
+      };
+
+      ctx.canvas.addEventListener("keydown", keydown_handler);
+      ctx.canvas.focus();
+    </script>
+  </body>
+</html>

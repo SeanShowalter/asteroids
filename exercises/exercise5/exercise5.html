@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Drawing an Asteroid</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="drawing.js"></script>
+    </head>
+    <body>
+        <h1>Drawing an Asteroid</h1>
+        <canvas id="asteroids" width="800" height="800"></canvas>
+        <script>
+            // Create canvas and context
+            const ctx = document.getElementById("asteroids").getContext("2d", {alpha: false});
+            draw_grid(ctx);
+            var segments = 15, noise = 0;
+            var shape = [];
+            for (var i = 0; i < segments; i++) {
+                let randomNum = (Math.random() - 0.5);
+                shape.push(2 * randomNum);
+            }
+            // Create a 5x5 grid of asteroids
+            for (let y = 0.1; y < 1; y += 0.2) {
+                for (let x = 0.1; x < 1; x += 0.2) {
+                    ctx.save();
+                    // moves contex origin to new x/y coordinates
+                    ctx.translate(ctx.canvas.width * x, ctx.canvas.height * y);
+                    // draws the asteroid at the new position
+                    draw_asteroid(ctx, ctx.canvas.width / 16, shape, {noise: noise, guide: true});
+                    // restores contex back to orignial position
+                    ctx.restore();
+                    // adds noise to next asteroid
+                    noise += 0.025;
+                }
+            }
+
+            
+        </script>
+    </body>
+</html>

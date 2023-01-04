@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Inheritance</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="drawing.js"></script>
+    <script src="objects.js"></script>
+  </head>
+  <body>
+    <h1>Inheritance</h1>
+    <canvas id="asteroids" width="600" height="600"></canvas>
+    <script>
+      "use strict";
+      // Create canvas and context
+      const ctx = document.getElementById("asteroids").getContext("2d");
+      const asteroids = new Array(5);
+      for (let i = 0; i < asteroids.length; i++) {
+        let asteroid = new Asteroid(
+          Math.random() * ctx.canvas.width,
+          Math.random() * ctx.canvas.height,
+          2000 + Math.random() * 8000
+        );
+        asteroid.push(Math.random() * 2 * Math.PI, 2000, 60);
+        asteroid.twist((Math.random() - 0.5) * 500, 60);
+        asteroids[i] = asteroid;
+      }
+
+      const ship = new Ship(ctx.canvas.width / 2, ctx.canvas.height / 2);
+
+      function draw(ctx) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        draw_grid(ctx);
+        asteroids.forEach(asteroid => asteroid.draw(ctx));
+        ship.draw(ctx);
+      }
+
+      function update(elapsed) {
+        asteroids.forEach(asteroid => asteroid.update(elapsed, ctx));
+        // push in the direction its pointing
+        ship.push(ship.angle, 1000, elapsed)
+        // if ship is nearly stopped, turn
+        if(Math.abs(ship.speed() < 15)) {
+          ship.angle += Math.PI * 2 * 0.1;
+        }
+
+        // If the ship is going fast, turn it around and slow down
+        if(Math.abs(ship.speed()) > 1000) {
+          ship.angle = ship.movementAngle() + Math.PI;
+        }
+
+        ;
+        ship.update(elapsed, ctx);
+      }
+
+      let previous, elapsed;
+      function frame(timestamp) {
+        if (!previous) previous = timestamp;
+        elapsed = timestamp - previous;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        update(elapsed / 1000);
+        draw(ctx);
+        previous = timestamp;
+        window.requestAnimationFrame(frame);
+      }
+      window.requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

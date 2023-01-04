@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Animation</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="drawing.js"></script>
+    </head>
+    <body>
+        <h1>Animation</h1>
+        <canvas id="asteroids" width="800" height="800"></canvas>
+        <script>
+            // Create canvas and context
+            const ctx = document.getElementById("asteroids").getContext("2d");
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 1.5;
+            var x = 0, y = ctx.canvas.height / 5, radius = 20;
+            let xspeed = 1.75, yspeed = 0, gravity = 0.1;
+            let mouth = 0;
+            
+
+            function frame() {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clear canvas
+                draw(ctx); // draw new circle
+                update(); // moves x one px to the right, y to yspeed
+            
+            }
+
+            function update() {
+                x += xspeed;
+                y += yspeed;
+                yspeed += gravity;
+                // console.log("y=" + y, "height=" + ctx.canvas.height,"radius=" + radius);
+                if (y >= ctx.canvas.height - radius) { 
+                    y = ctx.canvas.height - radius; // add an extra radius
+                    yspeed *= -0.6; // reverse and slow down
+                    xspeed *= 0.95; // just slow down a bit
+                }
+
+                if (x <= 0 || x >= ctx.canvas.width) {
+                    x = (x + ctx.canvas.width) % ctx.canvas.width;
+                }
+
+                mouth = Math.abs(Math.sin(6 * Math.PI * x / (ctx.canvas.width)));
+            }
+
+            function draw(ctx) {
+                draw_grid(ctx);
+                // draw simple circle
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                ctx.fill()
+                ctx.stroke();
+
+                //draw pacman
+                // ctx.save();
+                // ctx.translate(x,y);
+                // draw_pacman(ctx, x, y, radius, mouth);
+                // ctx.restore();
+            }
+
+            for (let c = 10; c > 0; c--) {
+                setInterval(frame, 1000.0 / 60.0); // calls frame() 60 times per second (60 fps)
+            
+            }
+            
+
+            
+        </script>
+    </body>
+</html>
